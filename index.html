@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>挪车二维码</title>
+  <script src="qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #667085;
+      --line: #d8dee8;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent: #059669;
+      --plate: #1e5bb8;
+      --danger: #dc2626;
+      --shadow: 0 20px 60px rgba(31, 41, 55, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.10), transparent 24rem),
+        linear-gradient(135deg, #f8fafc 0%, var(--bg) 48%, #eef6f1 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      display: grid;
+      width: min(1180px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 28px 0;
+      place-items: center;
+    }
+
+    .header {
+      margin: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(48px, 7vw, 76px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .layout {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(380px, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .left-pane {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 28px;
+      height: 100%;
+    }
+
+    .header {
+      display: grid;
+      min-height: 132px;
+      align-items: center;
+      text-align: center;
+    }
+
+    .panel {
+      border: 1px solid rgba(216, 222, 232, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      display: flex;
+      min-height: 430px;
+      flex-direction: column;
+      justify-content: center;
+      padding: 28px;
+    }
+
+    .field {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #344054;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 16px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .hint,
+    .error {
+      min-height: 22px;
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .hint {
+      color: var(--muted);
+    }
+
+    .error {
+      color: var(--danger);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 18px;
+      color: #fff;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .button:hover:not(:disabled):not(.disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.18);
+    }
+
+    .button.primary {
+      background: var(--primary);
+    }
+
+    .button.primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+    }
+
+    .button.secondary {
+      background: var(--accent);
+    }
+
+    .button.ghost {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: #fff;
+    }
+
+    .button:disabled,
+    .button.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .preview-column {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 18px;
+      height: 100%;
+    }
+
+    .phone-preview,
+    .print-card {
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .phone-preview {
+      padding: 20px;
+    }
+
+    .preview-title {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .plate {
+      display: inline-flex;
+      min-width: min(100%, 300px);
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #f8fafc;
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: #fff;
+      background: linear-gradient(180deg, #2468cf 0%, var(--plate) 100%);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28), 0 8px 18px rgba(30, 91, 184, 0.28);
+      font-size: clamp(28px, 6vw, 40px);
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .plate-dot {
+      margin: 0 5px;
+      opacity: 0.9;
+    }
+
+    .scan-message {
+      margin: 18px 0 6px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .scan-copy {
+      margin: 0 auto 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .call-preview {
+      width: 100%;
+      min-height: 58px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), #0f766e);
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    .print-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .print-card h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .print-card p {
+      margin: 8px 0 18px;
+      color: var(--muted);
+    }
+
+    #qrcode {
+      display: grid;
+      width: 200px;
+      height: 200px;
+      place-items: center;
+      margin: 0 auto;
+      border: 10px solid #fff;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(31, 41, 55, 0.12);
+    }
+
+    #qrcode img,
+    #qrcode canvas,
+    #qrcode svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .qr-placeholder {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      place-items: center;
+      color: var(--muted);
+      background: repeating-linear-gradient(45deg, #f3f5f8 0, #f3f5f8 10px, #e9edf3 10px, #e9edf3 20px);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .status {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    @media (max-width: 760px) and (min-width: 521px) {
+      .page {
+        width: calc(100% - 24px);
+        padding: 16px 0;
+      }
+
+      .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .left-pane {
+        grid-template-rows: auto 1fr;
+        gap: 18px;
+      }
+
+      .header {
+        min-height: 68px;
+      }
+
+      h1 {
+        font-size: 42px;
+      }
+
+      .form-panel,
+      .phone-preview,
+      .print-card {
+        padding: 14px;
+      }
+
+      .field {
+        margin-bottom: 14px;
+      }
+
+      .form-panel {
+        min-height: 0;
+      }
+
+      input {
+        height: 46px;
+        padding: 0 12px;
+      }
+
+      .hint,
+      .error {
+        min-height: 18px;
+        font-size: 12px;
+      }
+
+      .actions {
+        display: grid;
+        gap: 10px;
+      }
+
+      .button {
+        width: 100%;
+        min-height: 42px;
+        padding: 0 10px;
+        font-size: 14px;
+      }
+
+      .preview-column {
+        gap: 12px;
+      }
+
+      .preview-title {
+        margin-bottom: 10px;
+        font-size: 12px;
+      }
+
+      .plate {
+        width: 100%;
+        min-width: 0;
+        padding: 8px 10px;
+        font-size: 28px;
+      }
+
+      .scan-message {
+        margin-top: 12px;
+        font-size: 18px;
+      }
+
+      .scan-copy {
+        margin-bottom: 12px;
+        font-size: 13px;
+      }
+
+      .call-preview {
+        min-height: 44px;
+      }
+
+      .print-card h2 {
+        font-size: 18px;
+      }
+
+      .print-card p {
+        margin-bottom: 12px;
+        font-size: 13px;
+      }
+
+      #qrcode {
+        width: 138px;
+        height: 138px;
+        border-width: 7px;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100% - 24px, 1120px);
+        padding: 28px 0;
+        min-height: auto;
+        place-items: stretch;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .left-pane,
+      .preview-column {
+        height: auto;
+      }
+
+      .header {
+        min-height: auto;
+      }
+
+      .form-panel {
+        min-height: 0;
+      }
+
+      .form-panel,
+      .phone-preview,
+      .print-card {
+        padding: 20px;
+      }
+
+      .actions {
+        display: grid;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="layout">
+      <div class="left-pane">
+        <header class="header">
+          <h1>挪车二维码</h1>
+        </header>
+
+        <form class="panel form-panel" id="inputForm" novalidate>
+          <div class="field">
+            <label for="plateNumber">车牌号</label>
+            <input id="plateNumber" name="plateNumber" type="text" autocomplete="off" placeholder="京A88888" required>
+            <div id="plateNumberError" class="error" aria-live="polite"></div>
+          </div>
+
+          <div class="field">
+            <label for="phoneNumber">手机号</label>
+            <input id="phoneNumber" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel" placeholder="13800138000" maxlength="11" required>
+            <div id="phoneNumberError" class="error" aria-live="polite"></div>
+            <div class="hint">手机号只写入二维码链接，扫码页面不会直接展示号码。</div>
+          </div>
+
+          <div class="actions">
+            <a id="previewLink" class="button primary disabled" href="#" target="_blank" rel="noopener">打开扫码预览</a>
+            <button id="downloadButton" class="button secondary" type="button" disabled>下载二维码卡片</button>
+            <button id="resetButton" class="button ghost" type="button">清空</button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="preview-column" aria-label="实时预览">
+        <section class="panel phone-preview">
+          <p class="preview-title">手机扫码预览</p>
+          <div class="plate" aria-label="车牌号预览">
+            <span id="previewProvince">京</span><span id="previewLetter">A</span><span class="plate-dot">•</span><span id="previewNumber">88888</span>
+          </div>
+          <h2 class="scan-message">临时停靠，请多关照</h2>
+          <p class="scan-copy">点击下方按钮联系车主</p>
+          <span class="button call-preview">一键呼叫</span>
+        </section>
+
+        <section class="panel print-card" id="cardContent">
+          <h2>临时停靠，请扫码联系车主</h2>
+          <p id="cardPlateText">车牌号：京A88888</p>
+          <div id="qrcode">
+            <div class="qr-placeholder">填写信息后<br>自动生成二维码</div>
+          </div>
+          <div id="qrStatus" class="status">等待有效车牌号和手机号</div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const plateInput = document.getElementById('plateNumber');
+    const phoneInput = document.getElementById('phoneNumber');
+    const plateError = document.getElementById('plateNumberError');
+    const phoneError = document.getElementById('phoneNumberError');
+    const previewLink = document.getElementById('previewLink');
+    const downloadButton = document.getElementById('downloadButton');
+    const resetButton = document.getElementById('resetButton');
+    const qrCodeDiv = document.getElementById('qrcode');
+    const qrStatus = document.getElementById('qrStatus');
+    const cardPlateText = document.getElementById('cardPlateText');
+    const previewProvince = document.getElementById('previewProvince');
+    const previewLetter = document.getElementById('previewLetter');
+    const previewNumber = document.getElementById('previewNumber');
+
+    const plateNumberRegex = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9挂学警港澳使领]{5,6}$/;
+    const phoneNumberRegex = /^1\d{10}$/;
+
+    let lastUrl = '';
+    let isComposingPlate = false;
+
+    function normalizePlate(value) {
+      return value.trim().replace(/[\s·.-]/g, '').toUpperCase().slice(0, 8);
+    }
+
+    function getInfoUrl(plateNumber, phoneNumber) {
+      const url = new URL('info.html', window.location.href);
+      url.searchParams.set('plateNumber', plateNumber);
+      url.searchParams.set('phoneNumber', phoneNumber);
+      return url.toString();
+    }
+
+    function setPreviewPlate(plateNumber) {
+      const value = plateNumber || '京A88888';
+      previewProvince.textContent = value.charAt(0) || '京';
+      previewLetter.textContent = value.charAt(1) || 'A';
+      previewNumber.textContent = value.slice(2) || '88888';
+      cardPlateText.textContent = '车牌号：' + value;
+    }
+
+    function setQrPlaceholder(message) {
+      qrCodeDiv.innerHTML = '<div class="qr-placeholder">' + message + '</div>';
+    }
+
+    function updateState(options) {
+      const shouldCommitPlate = !(options && options.skipPlateCommit);
+      const plateNumber = normalizePlate(plateInput.value);
+      const phoneNumber = phoneInput.value.replace(/\D/g, '').slice(0, 11);
+      const hasPlate = plateNumber.length > 0;
+      const hasPhone = phoneNumber.length > 0;
+      const plateValid = plateNumberRegex.test(plateNumber);
+      const phoneValid = phoneNumberRegex.test(phoneNumber);
+
+      if (shouldCommitPlate && plateInput.value !== plateNumber) {
+        plateInput.value = plateNumber;
+      }
+      if (phoneInput.value !== phoneNumber) {
+        phoneInput.value = phoneNumber;
+      }
+
+      setPreviewPlate(plateNumber);
+      plateError.textContent = hasPlate && !plateValid ? '请输入正确的车牌号' : '';
+      phoneError.textContent = hasPhone && !phoneValid ? '请输入 11 位中国大陆手机号' : '';
+
+      if (!plateValid || !phoneValid) {
+        lastUrl = '';
+        previewLink.href = '#';
+        previewLink.classList.add('disabled');
+        downloadButton.disabled = true;
+        qrStatus.textContent = '等待有效车牌号和手机号';
+        setQrPlaceholder('填写信息后<br>自动生成二维码');
+        return;
+      }
+
+      const url = getInfoUrl(plateNumber, phoneNumber);
+      previewLink.href = url;
+      previewLink.classList.remove('disabled');
+      downloadButton.disabled = false;
+      qrStatus.textContent = '二维码已生成，扫码后进入车辆信息页';
+
+      if (url === lastUrl) {
+        return;
+      }
+
+      lastUrl = url;
+      qrCodeDiv.innerHTML = '';
+      new QRCode(qrCodeDiv, {
+        text: url,
+        width: 208,
+        height: 208,
+        colorDark: '#111827',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    function drawRoundedRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function getQrImageSource() {
+      return qrCodeDiv.querySelector('img') || qrCodeDiv.querySelector('canvas') || qrCodeDiv.querySelector('svg');
+    }
+
+    function loadImage(src) {
+      return new Promise(function(resolve, reject) {
+        const image = new Image();
+        image.onload = function() {
+          resolve(image);
+        };
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    async function renderCardImage() {
+      const qrSource = getQrImageSource();
+
+      if (!lastUrl || !qrSource) {
+        return '';
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 900;
+      canvas.height = 1260;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#f5f7fb';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      drawRoundedRect(ctx, 70, 70, 760, 1120, 32);
+      ctx.fill();
+
+      ctx.fillStyle = '#111827';
+      ctx.font = '700 46px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('临时停靠，请扫码联系车主', 450, 265);
+
+      ctx.fillStyle = '#ffffff';
+      drawRoundedRect(ctx, 135, 390, 630, 630, 30);
+      ctx.fill();
+
+      if (qrSource.tagName.toLowerCase() === 'canvas') {
+        ctx.drawImage(qrSource, 175, 430, 550, 550);
+      } else if (qrSource.tagName.toLowerCase() === 'svg') {
+        const svgData = new XMLSerializer().serializeToString(qrSource);
+        const image = await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData));
+        ctx.drawImage(image, 175, 430, 550, 550);
+      } else {
+        if (!qrSource.complete) {
+          await new Promise(function(resolve) {
+            qrSource.onload = resolve;
+          });
+        }
+        ctx.drawImage(qrSource, 175, 430, 550, 550);
+      }
+
+      return canvas.toDataURL('image/png');
+    }
+
+    document.getElementById('inputForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      updateState();
+      if (lastUrl) {
+        window.open(lastUrl, '_blank', 'noopener');
+      }
+    });
+
+    plateInput.addEventListener('compositionstart', function() {
+      isComposingPlate = true;
+    });
+    plateInput.addEventListener('compositionend', function() {
+      isComposingPlate = false;
+      updateState();
+    });
+    plateInput.addEventListener('input', function() {
+      updateState({ skipPlateCommit: isComposingPlate });
+    });
+    phoneInput.addEventListener('input', updateState);
+
+    previewLink.addEventListener('click', function(event) {
+      if (!lastUrl) {
+        event.preventDefault();
+      }
+    });
+
+    downloadButton.addEventListener('click', async function() {
+      const dataUrl = await renderCardImage();
+      if (!dataUrl) {
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'move-car-qrcode.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    resetButton.addEventListener('click', function() {
+      plateInput.value = '';
+      phoneInput.value = '';
+      updateState();
+      plateInput.focus();
+    });
+
+    updateState();
+  </script>
+</body>
+</html>

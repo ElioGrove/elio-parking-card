@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>挪车信息</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #111827;
+      --muted: #667085;
+      --primary: #2563eb;
+      --accent: #059669;
+      --plate: #1e5bb8;
+      --danger: #dc2626;
+      --shadow: 0 20px 60px rgba(31, 41, 55, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.12), transparent 24rem),
+        linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+    }
+
+    .page {
+      width: min(100% - 32px, 460px);
+      padding: 32px 0;
+      text-align: center;
+    }
+
+    .panel {
+      border: 1px solid rgba(216, 222, 232, 0.95);
+      border-radius: 8px;
+      padding: 28px 22px 24px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .plate {
+      display: inline-flex;
+      width: min(100%, 330px);
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      padding: 12px 18px;
+      color: #fff;
+      background: linear-gradient(180deg, #2468cf 0%, var(--plate) 100%);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28), 0 12px 28px rgba(30, 91, 184, 0.26);
+      font-size: clamp(34px, 11vw, 48px);
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .plate-dot {
+      margin: 0 5px;
+      opacity: 0.9;
+    }
+
+    h1 {
+      margin: 28px 0 10px;
+      font-size: clamp(30px, 8vw, 42px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .copy {
+      margin: 0 auto 24px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+
+    .car-text {
+      margin: 0 0 24px;
+      color: #344054;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .call-button {
+      display: inline-flex;
+      width: 100%;
+      min-height: 68px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), #0f766e);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.26);
+      font-size: 22px;
+      font-weight: 900;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .call-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 34px rgba(37, 99, 235, 0.32);
+    }
+
+    .notice {
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .empty {
+      background: #f3f4f6;
+      box-shadow: none;
+      color: var(--danger);
+      font-weight: 800;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <div class="plate" aria-label="车牌号">
+        <span id="carProvince">京</span><span id="carLetter">A</span><span class="plate-dot">•</span><span id="carNumber">88888</span>
+      </div>
+      <h1>临时停靠，请多关照</h1>
+      <p class="copy">如车辆影响通行，请点击下方按钮联系车主挪车。</p>
+      <p id="carText" class="car-text">车牌号：京A88888</p>
+      <a id="callButton" class="call-button" href="#">一键呼叫</a>
+      <p id="notice" class="notice">为保护隐私，页面不直接展示联系电话。</p>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const plateNumber = (params.get('plateNumber') || '').trim().replace(/\s+/g, '').toUpperCase();
+    const phoneNumber = (params.get('phoneNumber') || '').trim();
+    const phoneNumberRegex = /^1\d{10}$/;
+
+    const carProvince = document.getElementById('carProvince');
+    const carLetter = document.getElementById('carLetter');
+    const carNumber = document.getElementById('carNumber');
+    const carText = document.getElementById('carText');
+    const callButton = document.getElementById('callButton');
+    const notice = document.getElementById('notice');
+
+    function setPlate(value) {
+      const displayValue = value || '京A88888';
+      carProvince.textContent = displayValue.charAt(0) || '京';
+      carLetter.textContent = displayValue.charAt(1) || 'A';
+      carNumber.textContent = displayValue.slice(2) || '88888';
+      carText.textContent = value ? '车牌号：' + value : '未获取到车牌号';
+    }
+
+    setPlate(plateNumber);
+
+    if (phoneNumberRegex.test(phoneNumber)) {
+      callButton.href = 'tel:' + phoneNumber;
+    } else {
+      callButton.removeAttribute('href');
+      callButton.textContent = '号码无效';
+      callButton.classList.add('empty');
+      notice.textContent = '二维码缺少有效手机号，请联系车主重新生成。';
+    }
+  </script>
+</body>
+</html>
