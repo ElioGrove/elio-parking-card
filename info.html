@@ -50,6 +50,7 @@
 
     .plate {
       display: inline-flex;
+      position: relative;
       width: min(100%, 330px);
       align-items: center;
       justify-content: center;
@@ -65,6 +66,37 @@
       letter-spacing: 0;
       text-transform: uppercase;
       white-space: nowrap;
+    }
+
+    .plate-screw {
+      position: absolute;
+      z-index: 1;
+      width: 10px;
+      height: 10px;
+      border: 1px solid #64748b;
+      border-radius: 50%;
+      background: radial-gradient(circle, #475569 0 28%, #dbe3ec 32% 58%, #64748b 62% 100%);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.38);
+    }
+
+    .screw-top-left,
+    .screw-bottom-left {
+      left: 10%;
+    }
+
+    .screw-top-right,
+    .screw-bottom-right {
+      right: 10%;
+    }
+
+    .screw-top-left,
+    .screw-top-right {
+      top: 7px;
+    }
+
+    .screw-bottom-left,
+    .screw-bottom-right {
+      bottom: -10px;
     }
 
     .plate-dot {
@@ -84,6 +116,10 @@
       color: var(--muted);
       font-size: 17px;
       line-height: 1.8;
+    }
+
+    .copy-mobile {
+      display: none;
     }
 
     .call-button {
@@ -130,6 +166,14 @@
       .plate {
         width: 100%;
       }
+
+      .copy-desktop {
+        display: none;
+      }
+
+      .copy-mobile {
+        display: inline;
+      }
     }
   </style>
 </head>
@@ -137,10 +181,14 @@
   <main class="page">
     <section class="panel">
       <div class="plate" aria-label="车牌号">
+        <span class="plate-screw screw-top-left" aria-hidden="true"></span>
+        <span class="plate-screw screw-top-right" aria-hidden="true"></span>
+        <span class="plate-screw screw-bottom-left" aria-hidden="true"></span>
+        <span class="plate-screw screw-bottom-right" aria-hidden="true"></span>
         <span id="carProvince">京</span><span id="carLetter">A</span><span class="plate-dot">•</span><span id="carNumber">88888</span>
       </div>
       <h1>临时停靠，请多关照</h1>
-      <p class="copy">如车辆影响通行，请点击下方按钮联系车主挪车。</p>
+      <p class="copy"><span class="copy-desktop">如车辆影响通行，请点击下方按钮联系车主挪车。</span><span class="copy-mobile">点击下方按钮联系车主</span></p>
       <a id="callButton" class="call-button" href="#">一键呼叫</a>
       <p id="notice" class="notice">为保护隐私，页面不直接展示联系电话。</p>
     </section>

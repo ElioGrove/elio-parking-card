@@ -226,6 +226,7 @@
 
     .plate {
       display: inline-flex;
+      position: relative;
       min-width: min(100%, 300px);
       align-items: center;
       justify-content: center;
@@ -241,6 +242,37 @@
       letter-spacing: 0;
       text-transform: uppercase;
       white-space: nowrap;
+    }
+
+    .plate-screw {
+      position: absolute;
+      z-index: 1;
+      width: 10px;
+      height: 10px;
+      border: 1px solid #64748b;
+      border-radius: 50%;
+      background: radial-gradient(circle, #475569 0 28%, #dbe3ec 32% 58%, #64748b 62% 100%);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.38);
+    }
+
+    .screw-top-left,
+    .screw-bottom-left {
+      left: 10%;
+    }
+
+    .screw-top-right,
+    .screw-bottom-right {
+      right: 10%;
+    }
+
+    .screw-top-left,
+    .screw-top-right {
+      top: 7px;
+    }
+
+    .screw-bottom-left,
+    .screw-bottom-right {
+      bottom: -10px;
     }
 
     .plate-dot {
@@ -518,6 +550,10 @@
         <section class="panel phone-preview">
           <p class="preview-title">手机扫码预览</p>
           <div class="plate" aria-label="车牌号预览">
+            <span class="plate-screw screw-top-left" aria-hidden="true"></span>
+            <span class="plate-screw screw-top-right" aria-hidden="true"></span>
+            <span class="plate-screw screw-bottom-left" aria-hidden="true"></span>
+            <span class="plate-screw screw-bottom-right" aria-hidden="true"></span>
             <span id="previewProvince">京</span><span id="previewLetter">A</span><span class="plate-dot">•</span><span id="previewNumber">88888</span>
           </div>
           <h2 class="scan-message">临时停靠，请多关照</h2>
@@ -526,7 +562,7 @@
         </section>
 
         <section class="panel print-card" id="cardContent">
-          <h2>微信扫码，呼叫车主</h2>
+          <h2>微信扫码 | 呼叫车主</h2>
           <div id="qrcode">
             <div class="qr-placeholder">填写信息后<br>自动生成二维码</div>
           </div>
@@ -674,34 +710,34 @@
       ctx.fillStyle = '#f5f7fb';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#ffffff';
-      drawRoundedRect(ctx, 60, 60, 960, 960, 32);
+      drawRoundedRect(ctx, 90, 90, 900, 900, 32);
       ctx.fill();
 
       ctx.fillStyle = '#111827';
-      ctx.font = '700 54px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+      ctx.font = '700 52px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('微信扫码，呼叫车主', 540, 175);
+      ctx.fillText('微信扫码 | 呼叫车主', 540, 180);
 
       ctx.fillStyle = '#ffffff';
-      drawRoundedRect(ctx, 180, 260, 720, 720, 24);
+      drawRoundedRect(ctx, 190, 230, 700, 700, 24);
       ctx.fill();
 
       ctx.imageSmoothingEnabled = false;
 
       if (qrSource.tagName.toLowerCase() === 'canvas') {
-        ctx.drawImage(qrSource, 220, 300, 640, 640);
+        ctx.drawImage(qrSource, 228, 268, 624, 624);
       } else if (qrSource.tagName.toLowerCase() === 'svg') {
         const svgData = new XMLSerializer().serializeToString(qrSource);
         const image = await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData));
-        ctx.drawImage(image, 220, 300, 640, 640);
+        ctx.drawImage(image, 228, 268, 624, 624);
       } else {
         if (!qrSource.complete) {
           await new Promise(function(resolve) {
             qrSource.onload = resolve;
           });
         }
-        ctx.drawImage(qrSource, 220, 300, 640, 640);
+        ctx.drawImage(qrSource, 228, 268, 624, 624);
       }
 
       return canvas.toDataURL('image/png');
