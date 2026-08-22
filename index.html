@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>挪车二维码</title>
+  <link rel="icon" type="image/svg+xml" href="cartoon-sports-car.svg">
   <script src="qrcode.min.js"></script>
   <style>
     :root {
@@ -58,10 +59,20 @@
     }
 
     h1 {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
       margin: 0;
-      font-size: clamp(48px, 7vw, 76px);
+      font-size: clamp(36px, 5.3vw, 56px);
       line-height: 1;
       letter-spacing: 0;
+    }
+
+    .site-logo {
+      width: clamp(44px, 5.5vw, 58px);
+      height: auto;
+      flex: 0 0 auto;
     }
 
     .layout {
@@ -160,7 +171,7 @@
       align-items: center;
       justify-content: center;
       border: 0;
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 0 18px;
       color: #fff;
       font-weight: 800;
@@ -295,9 +306,9 @@
     .call-preview {
       width: 100%;
       min-height: 58px;
-      border-radius: 8px;
+      border-radius: 12px;
       color: #fff;
-      background: #111827;
+      background: #c96542;
       font-size: 19px;
       letter-spacing: 0;
     }
@@ -379,7 +390,7 @@
       }
 
       h1 {
-        font-size: 42px;
+        font-size: 38px;
       }
 
       .form-panel,
@@ -522,7 +533,7 @@
     <section class="layout">
       <div class="left-pane">
         <header class="header">
-          <h1>挪车二维码</h1>
+          <h1><img class="site-logo" src="cartoon-sports-car.svg" alt="" aria-hidden="true">挪车二维码</h1>
         </header>
 
         <form class="panel form-panel" id="inputForm" novalidate>
