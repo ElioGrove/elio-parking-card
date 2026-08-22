@@ -25,7 +25,8 @@
       display: grid;
       min-height: 100vh;
       margin: 0;
-      place-items: center;
+      align-items: start;
+      justify-items: center;
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       background:
@@ -35,7 +36,7 @@
 
     .page {
       width: min(100% - 32px, 460px);
-      padding: 32px 0;
+      padding: 36px 0;
       text-align: center;
     }
 
@@ -52,16 +53,18 @@
       width: min(100%, 330px);
       align-items: center;
       justify-content: center;
-      border: 2px solid #fff;
+      border: 2px solid var(--plate);
+      border-bottom-width: 12px;
       border-radius: 8px;
       padding: 12px 18px;
-      color: #fff;
-      background: linear-gradient(180deg, #2468cf 0%, var(--plate) 100%);
-      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28), 0 12px 28px rgba(30, 91, 184, 0.26);
+      color: #111827;
+      background: #fff;
+      box-shadow: 0 12px 28px rgba(30, 91, 184, 0.18);
       font-size: clamp(34px, 11vw, 48px);
       font-weight: 900;
       letter-spacing: 0;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .plate-dot {
@@ -81,13 +84,6 @@
       color: var(--muted);
       font-size: 17px;
       line-height: 1.8;
-    }
-
-    .car-text {
-      margin: 0 0 24px;
-      color: #344054;
-      font-size: 18px;
-      font-weight: 800;
     }
 
     .call-button {
@@ -125,6 +121,16 @@
       font-weight: 800;
       pointer-events: none;
     }
+
+    @media (max-width: 520px) {
+      .page {
+        padding: 20px 0;
+      }
+
+      .plate {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -135,7 +141,6 @@
       </div>
       <h1>临时停靠，请多关照</h1>
       <p class="copy">如车辆影响通行，请点击下方按钮联系车主挪车。</p>
-      <p id="carText" class="car-text">车牌号：京A88888</p>
       <a id="callButton" class="call-button" href="#">一键呼叫</a>
       <p id="notice" class="notice">为保护隐私，页面不直接展示联系电话。</p>
     </section>
@@ -150,7 +155,6 @@
     const carProvince = document.getElementById('carProvince');
     const carLetter = document.getElementById('carLetter');
     const carNumber = document.getElementById('carNumber');
-    const carText = document.getElementById('carText');
     const callButton = document.getElementById('callButton');
     const notice = document.getElementById('notice');
 
@@ -159,7 +163,6 @@
       carProvince.textContent = displayValue.charAt(0) || '京';
       carLetter.textContent = displayValue.charAt(1) || 'A';
       carNumber.textContent = displayValue.slice(2) || '88888';
-      carText.textContent = value ? '车牌号：' + value : '未获取到车牌号';
     }
 
     setPlate(plateNumber);

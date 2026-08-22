@@ -48,8 +48,9 @@
       width: min(1180px, calc(100% - 32px));
       min-height: 100vh;
       margin: 0 auto;
-      padding: 28px 0;
-      place-items: center;
+      padding: 36px 0;
+      align-items: start;
+      justify-items: center;
     }
 
     .header {
@@ -228,16 +229,18 @@
       min-width: min(100%, 300px);
       align-items: center;
       justify-content: center;
-      border: 2px solid #f8fafc;
+      border: 2px solid var(--plate);
+      border-bottom-width: 12px;
       border-radius: 8px;
       padding: 10px 18px;
-      color: #fff;
-      background: linear-gradient(180deg, #2468cf 0%, var(--plate) 100%);
-      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.28), 0 8px 18px rgba(30, 91, 184, 0.28);
+      color: #111827;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(30, 91, 184, 0.18);
       font-size: clamp(28px, 6vw, 40px);
       font-weight: 900;
       letter-spacing: 0;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .plate-dot {
@@ -325,7 +328,7 @@
     @media (max-width: 760px) and (min-width: 521px) {
       .page {
         width: calc(100% - 24px);
-        padding: 16px 0;
+        padding: 24px 0;
       }
 
       .layout {
@@ -437,7 +440,7 @@
     @media (max-width: 520px) {
       .page {
         width: min(100% - 24px, 1120px);
-        padding: 28px 0;
+        padding: 20px 0;
         min-height: auto;
         place-items: stretch;
       }
@@ -464,6 +467,11 @@
       .phone-preview,
       .print-card {
         padding: 20px;
+      }
+
+      .phone-preview .plate {
+        width: 100%;
+        min-width: 0;
       }
 
       .actions {
@@ -518,8 +526,7 @@
         </section>
 
         <section class="panel print-card" id="cardContent">
-          <h2>临时停靠，请扫码联系车主</h2>
-          <p id="cardPlateText">车牌号：京A88888</p>
+          <h2>微信扫码，呼叫车主</h2>
           <div id="qrcode">
             <div class="qr-placeholder">填写信息后<br>自动生成二维码</div>
           </div>
@@ -539,7 +546,6 @@
     const resetButton = document.getElementById('resetButton');
     const qrCodeDiv = document.getElementById('qrcode');
     const qrStatus = document.getElementById('qrStatus');
-    const cardPlateText = document.getElementById('cardPlateText');
     const previewProvince = document.getElementById('previewProvince');
     const previewLetter = document.getElementById('previewLetter');
     const previewNumber = document.getElementById('previewNumber');
@@ -566,7 +572,6 @@
       previewProvince.textContent = value.charAt(0) || '京';
       previewLetter.textContent = value.charAt(1) || 'A';
       previewNumber.textContent = value.slice(2) || '88888';
-      cardPlateText.textContent = '车牌号：' + value;
     }
 
     function setQrPlaceholder(message) {
@@ -662,39 +667,41 @@
       }
 
       const canvas = document.createElement('canvas');
-      canvas.width = 900;
-      canvas.height = 1260;
+      canvas.width = 1080;
+      canvas.height = 1080;
       const ctx = canvas.getContext('2d');
 
       ctx.fillStyle = '#f5f7fb';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#ffffff';
-      drawRoundedRect(ctx, 70, 70, 760, 1120, 32);
+      drawRoundedRect(ctx, 60, 60, 960, 960, 32);
       ctx.fill();
 
       ctx.fillStyle = '#111827';
-      ctx.font = '700 46px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.font = '700 54px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('临时停靠，请扫码联系车主', 450, 265);
+      ctx.fillText('微信扫码，呼叫车主', 540, 175);
 
       ctx.fillStyle = '#ffffff';
-      drawRoundedRect(ctx, 135, 390, 630, 630, 30);
+      drawRoundedRect(ctx, 180, 260, 720, 720, 24);
       ctx.fill();
 
+      ctx.imageSmoothingEnabled = false;
+
       if (qrSource.tagName.toLowerCase() === 'canvas') {
-        ctx.drawImage(qrSource, 175, 430, 550, 550);
+        ctx.drawImage(qrSource, 220, 300, 640, 640);
       } else if (qrSource.tagName.toLowerCase() === 'svg') {
         const svgData = new XMLSerializer().serializeToString(qrSource);
         const image = await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData));
-        ctx.drawImage(image, 175, 430, 550, 550);
+        ctx.drawImage(image, 220, 300, 640, 640);
       } else {
         if (!qrSource.complete) {
           await new Promise(function(resolve) {
             qrSource.onload = resolve;
           });
         }
-        ctx.drawImage(qrSource, 175, 430, 550, 550);
+        ctx.drawImage(qrSource, 220, 300, 640, 640);
       }
 
       return canvas.toDataURL('image/png');
