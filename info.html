@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
   <title>挪车信息</title>
   <link rel="icon" type="image/svg+xml" href="electric-car-charging.svg">
   <style>
@@ -194,16 +196,17 @@
       </div>
       <h1>临时停靠，请多关照</h1>
       <p class="copy"><span class="copy-desktop">如车辆影响通行，请点击下方按钮联系车主挪车。</span><span class="copy-mobile">点击下方按钮联系车主</span></p>
-      <a id="callButton" class="call-button" href="#">一键呼叫</a>
+      <a id="callButton" class="call-button" aria-disabled="true">一键呼叫</a>
       <p id="notice" class="notice">为保护隐私，页面不直接展示联系电话。</p>
     </section>
   </main>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const plateNumber = (params.get('plateNumber') || '').trim().replace(/\s+/g, '').toUpperCase();
+    const plateNumber = (params.get('plateNumber') || '').trim().replace(/[\s·.-]/g, '').toUpperCase();
     const phoneNumber = (params.get('phoneNumber') || '').trim();
     const phoneNumberRegex = /^1\d{10}$/;
+    const plateNumberRegex = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-Z0-9挂学警港澳使领]{5,6}$/;
 
     const carProvince = document.getElementById('carProvince');
     const carLetter = document.getElementById('carLetter');
@@ -212,16 +215,18 @@
     const notice = document.getElementById('notice');
 
     function setPlate(value) {
-      const displayValue = value || '京A88888';
-      carProvince.textContent = displayValue.charAt(0) || '京';
-      carLetter.textContent = displayValue.charAt(1) || 'A';
-      carNumber.textContent = displayValue.slice(2) || '88888';
+      const valid = plateNumberRegex.test(value);
+      carProvince.textContent = valid ? value.charAt(0) : '';
+      carLetter.textContent = valid ? value.charAt(1) : '';
+      carNumber.textContent = valid ? value.slice(2) : '车牌无效';
+      document.querySelector('.plate-dot').hidden = !valid;
     }
 
     setPlate(plateNumber);
 
     if (phoneNumberRegex.test(phoneNumber)) {
       callButton.href = 'tel:' + phoneNumber;
+      callButton.setAttribute('aria-disabled', 'false');
     } else {
       callButton.removeAttribute('href');
       callButton.textContent = '号码无效';

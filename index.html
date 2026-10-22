@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>挪车二维码</title>
   <link rel="icon" type="image/svg+xml" href="electric-car-charging.svg">
   <script src="qrcode.min.js"></script>
@@ -359,6 +360,7 @@
       background: repeating-linear-gradient(45deg, #f3f5f8 0, #f3f5f8 10px, #e9edf3 10px, #e9edf3 20px);
       font-size: 14px;
       line-height: 1.6;
+      white-space: pre-line;
     }
 
     .status {
@@ -547,11 +549,11 @@
             <label for="phoneNumber">手机号</label>
             <input id="phoneNumber" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel" placeholder="13800138000" maxlength="11" required>
             <div id="phoneNumberError" class="error" aria-live="polite"></div>
-            <div class="hint">手机号只写入二维码链接，扫码页面不会直接展示号码。</div>
+            <div class="hint">手机号写入二维码链接，扫码页面不直接展示；获得二维码的人可读取号码。</div>
           </div>
 
           <div class="actions">
-            <a id="previewLink" class="button primary disabled" href="#" target="_blank" rel="noopener">打开扫码预览</a>
+            <a id="previewLink" class="button primary disabled" aria-disabled="true" target="_blank" rel="noopener noreferrer">打开扫码预览</a>
             <button id="downloadButton" class="button secondary" type="button" disabled>下载二维码卡片</button>
             <button id="resetButton" class="button ghost" type="button">清空</button>
           </div>
@@ -578,7 +580,7 @@
           <div id="qrcode">
             <div class="qr-placeholder">填写信息后<br>自动生成二维码</div>
           </div>
-          <div id="qrStatus" class="status">等待有效车牌号和手机号</div>
+          <div id="qrStatus" class="status" role="status">等待有效车牌号和手机号</div>
         </section>
       </aside>
     </section>
@@ -605,7 +607,7 @@
     let isComposingPlate = false;
 
     function normalizePlate(value) {
-      return value.trim().replace(/[\s·.-]/g, '').toUpperCase().slice(0, 8);
+      return value.trim().replace(/[\s·.-]/g, '').toUpperCase();
     }
 
     function getInfoUrl(plateNumber, phoneNumber) {
@@ -623,7 +625,20 @@
     }
 
     function setQrPlaceholder(message) {
-      qrCodeDiv.innerHTML = '<div class="qr-placeholder">' + message + '</div>';
+      const placeholder = document.createElement('div');
+      placeholder.className = 'qr-placeholder';
+      placeholder.textContent = message;
+      qrCodeDiv.textContent = '';
+      qrCodeDiv.appendChild(placeholder);
+      qrCodeDiv.removeAttribute('title');
+    }
+
+    function disableQrActions() {
+      lastUrl = '';
+      previewLink.removeAttribute('href');
+      previewLink.classList.add('disabled');
+      previewLink.setAttribute('aria-disabled', 'true');
+      downloadButton.disabled = true;
     }
 
     function updateState(options) {
@@ -642,40 +657,44 @@
         phoneInput.value = phoneNumber;
       }
 
-      setPreviewPlate(plateNumber);
+      setPreviewPlate(plateNumber.slice(0, 8));
       plateError.textContent = hasPlate && !plateValid ? '请输入正确的车牌号' : '';
       phoneError.textContent = hasPhone && !phoneValid ? '请输入 11 位中国大陆手机号' : '';
 
       if (!plateValid || !phoneValid) {
-        lastUrl = '';
-        previewLink.href = '#';
-        previewLink.classList.add('disabled');
-        downloadButton.disabled = true;
+        disableQrActions();
         qrStatus.textContent = '等待有效车牌号和手机号';
-        setQrPlaceholder('填写信息后<br>自动生成二维码');
+        setQrPlaceholder('填写信息后\n自动生成二维码');
         return;
       }
 
       const url = getInfoUrl(plateNumber, phoneNumber);
-      previewLink.href = url;
-      previewLink.classList.remove('disabled');
-      downloadButton.disabled = false;
-      qrStatus.textContent = '二维码已生成，扫码后进入车辆信息页';
-
       if (url === lastUrl) {
         return;
       }
 
-      lastUrl = url;
-      qrCodeDiv.innerHTML = '';
-      new QRCode(qrCodeDiv, {
-        text: url,
-        width: 208,
-        height: 208,
-        colorDark: '#111827',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
+      disableQrActions();
+      qrCodeDiv.textContent = '';
+      try {
+        new QRCode(qrCodeDiv, {
+          text: url,
+          width: 624,
+          height: 624,
+          colorDark: '#111827',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        qrCodeDiv.removeAttribute('title');
+        lastUrl = url;
+        previewLink.href = url;
+        previewLink.classList.remove('disabled');
+        previewLink.setAttribute('aria-disabled', 'false');
+        downloadButton.disabled = false;
+        qrStatus.textContent = '二维码已生成，扫码后进入车辆信息页';
+      } catch (error) {
+        setQrPlaceholder('二维码生成失败');
+        qrStatus.textContent = '二维码生成失败，请检查页面地址长度并重试或刷新页面。';
+      }
     }
 
     function drawRoundedRect(ctx, x, y, width, height, radius) {
@@ -693,7 +712,8 @@
     }
 
     function getQrImageSource() {
-      return qrCodeDiv.querySelector('img') || qrCodeDiv.querySelector('canvas') || qrCodeDiv.querySelector('svg');
+      // The canvas is ready synchronously; QRCode.js updates its image asynchronously.
+      return qrCodeDiv.querySelector('canvas') || qrCodeDiv.querySelector('img') || qrCodeDiv.querySelector('svg');
     }
 
     function loadImage(src) {
@@ -718,6 +738,10 @@
       canvas.width = 1080;
       canvas.height = 1080;
       const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        throw new Error('Canvas is unavailable');
+      }
 
       ctx.fillStyle = '#f5f7fb';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -744,12 +768,8 @@
         const image = await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData));
         ctx.drawImage(image, 228, 268, 624, 624);
       } else {
-        if (!qrSource.complete) {
-          await new Promise(function(resolve) {
-            qrSource.onload = resolve;
-          });
-        }
-        ctx.drawImage(qrSource, 228, 268, 624, 624);
+        const image = await loadImage(qrSource.src);
+        ctx.drawImage(image, 228, 268, 624, 624);
       }
 
       return canvas.toDataURL('image/png');
@@ -782,17 +802,25 @@
     });
 
     downloadButton.addEventListener('click', async function() {
-      const dataUrl = await renderCardImage();
-      if (!dataUrl) {
-        return;
-      }
+      const sourceUrl = lastUrl;
+      downloadButton.disabled = true;
+      try {
+        const dataUrl = await renderCardImage();
+        if (!dataUrl || lastUrl !== sourceUrl) {
+          return;
+        }
 
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = 'move-car-qrcode.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = 'move-car-qrcode.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (error) {
+        qrStatus.textContent = '下载失败，请重试或使用浏览器保存二维码图片。';
+      } finally {
+        downloadButton.disabled = !lastUrl;
+      }
     });
 
     resetButton.addEventListener('click', function() {
