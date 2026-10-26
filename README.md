@@ -1,15 +1,15 @@
-# elio-move-car
+# elio-parking-card
 
 <!-- cloudflare-git-config:start -->
 ## Cloudflare Git 集成建议配置
 
 核对日期：2026-10-26。
 
-使用 **Cloudflare Pages / GitHub**，连接 `ElioGrove/elio-move-car`。
+使用 **Cloudflare Pages / GitHub**，连接 `ElioGrove/elio-parking-card`。
 
 | 配置项 | 建议值 |
 | --- | --- |
-| Pages 项目名称 | `elio-move-car` |
+| Pages 项目名称 | `elio-parking-card` |
 | 生产分支 | `main` |
 | 根目录 | `/`（仓库根目录） |
 | 框架预设 | None；按下面的构建命令和产物路径填写 |
