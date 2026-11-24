@@ -10,7 +10,6 @@
   <style>
     :root {
       --bg: #f5f7fb;
-      --panel: #ffffff;
       --text: #1f2937;
       --muted: #667085;
       --line: #d8dee8;
@@ -55,10 +54,6 @@
       justify-items: center;
     }
 
-    .header {
-      margin: 0;
-    }
-
     h1 {
       display: inline-flex;
       align-items: center;
@@ -94,6 +89,7 @@
     .header {
       display: grid;
       min-height: 132px;
+      margin: 0;
       align-items: center;
       text-align: center;
     }
@@ -327,11 +323,6 @@
       letter-spacing: 0;
     }
 
-    .print-card p {
-      margin: 8px 0 18px;
-      color: var(--muted);
-    }
-
     #qrcode {
       display: grid;
       width: 200px;
@@ -383,7 +374,6 @@
       }
 
       .left-pane {
-        grid-template-rows: auto 1fr;
         gap: 18px;
       }
 
@@ -466,11 +456,6 @@
         font-size: 18px;
       }
 
-      .print-card p {
-        margin-bottom: 12px;
-        font-size: 13px;
-      }
-
       #qrcode {
         width: 138px;
         height: 138px;
@@ -541,15 +526,15 @@
         <form class="panel form-panel" id="inputForm" novalidate>
           <div class="field">
             <label for="plateNumber">车牌号</label>
-            <input id="plateNumber" name="plateNumber" type="text" autocomplete="off" placeholder="京A88888" required>
+            <input id="plateNumber" name="plateNumber" type="text" autocomplete="off" placeholder="京A88888" aria-describedby="plateNumberError" required>
             <div id="plateNumberError" class="error" aria-live="polite"></div>
           </div>
 
           <div class="field">
             <label for="phoneNumber">手机号</label>
-            <input id="phoneNumber" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel" placeholder="13800138000" maxlength="11" required>
+            <input id="phoneNumber" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel" placeholder="13800138000" maxlength="11" aria-describedby="phoneNumberError phoneNumberHint" required>
             <div id="phoneNumberError" class="error" aria-live="polite"></div>
-            <div class="hint">手机号写入二维码链接，扫码页面不直接展示；获得二维码的人可读取号码。</div>
+            <div id="phoneNumberHint" class="hint">手机号写入二维码链接，扫码页面不直接展示；获得二维码的人可读取号码。</div>
           </div>
 
           <div class="actions">
@@ -568,7 +553,7 @@
             <span class="plate-screw screw-top-right" aria-hidden="true"></span>
             <span class="plate-screw screw-bottom-left" aria-hidden="true"></span>
             <span class="plate-screw screw-bottom-right" aria-hidden="true"></span>
-            <span id="previewProvince">京</span><span id="previewLetter">A</span><span class="plate-dot">•</span><span id="previewNumber">88888</span>
+            <span id="previewProvince">京</span><span id="previewLetter">A</span><span class="plate-dot" aria-hidden="true">•</span><span id="previewNumber">88888</span>
           </div>
           <h2 class="scan-message">临时停靠，请多关照</h2>
           <p class="scan-copy">点击下方按钮联系车主</p>
@@ -660,6 +645,8 @@
       setPreviewPlate(plateNumber.slice(0, 8));
       plateError.textContent = hasPlate && !plateValid ? '请输入正确的车牌号' : '';
       phoneError.textContent = hasPhone && !phoneValid ? '请输入 11 位中国大陆手机号' : '';
+      plateInput.setAttribute('aria-invalid', String(hasPlate && !plateValid));
+      phoneInput.setAttribute('aria-invalid', String(hasPhone && !phoneValid));
 
       if (!plateValid || !phoneValid) {
         disableQrActions();
@@ -685,6 +672,10 @@
           correctLevel: QRCode.CorrectLevel.H
         });
         qrCodeDiv.removeAttribute('title');
+        const qrImage = qrCodeDiv.querySelector('img');
+        if (qrImage) {
+          qrImage.alt = '挪车二维码';
+        }
         lastUrl = url;
         previewLink.href = url;
         previewLink.classList.remove('disabled');
@@ -779,7 +770,7 @@
       event.preventDefault();
       updateState();
       if (lastUrl) {
-        window.open(lastUrl, '_blank', 'noopener');
+        window.open(lastUrl, '_blank', 'noopener,noreferrer');
       }
     });
 
@@ -793,7 +784,9 @@
     plateInput.addEventListener('input', function() {
       updateState({ skipPlateCommit: isComposingPlate });
     });
-    phoneInput.addEventListener('input', updateState);
+    phoneInput.addEventListener('input', function() {
+      updateState();
+    });
 
     previewLink.addEventListener('click', function(event) {
       if (!lastUrl) {
