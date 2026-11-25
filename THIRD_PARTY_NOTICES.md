@@ -3,7 +3,7 @@
 ## QRCode.js
 
 - Upstream: https://github.com/davidshimjs/qrcodejs
-- Vendored file: `qrcode.min.js` (unchanged upstream minified distribution)
+- Vendored file: `public/qrcode.min.js` (unchanged upstream minified distribution)
 - SHA-256: `c541ef06327885a8415bca8df6071e14189b4855336def4f36db54bde8484f36`
 - License: MIT
 

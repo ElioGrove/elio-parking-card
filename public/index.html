@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>挪车二维码</title>
+  <link rel="icon" type="image/svg+xml" href="electric-car-charging.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="qrcode.min.js" defer></script>
+  <script src="plate-utils.js" defer></script>
+  <script src="index.js" defer></script>
+</head>
+<body class="generator-page">
+  <main class="page">
+    <section class="layout">
+      <div class="left-pane">
+        <header class="header">
+          <h1><img class="site-logo" src="electric-car-charging.svg" alt="" aria-hidden="true">挪车二维码</h1>
+        </header>
+
+        <form class="panel form-panel" id="inputForm" novalidate>
+          <div class="field">
+            <label for="plateNumber">车牌号</label>
+            <input id="plateNumber" name="plateNumber" type="text" autocomplete="off" placeholder="京A88888" aria-describedby="plateNumberError" required>
+            <div id="plateNumberError" class="error" aria-live="polite"></div>
+          </div>
+
+          <div class="field">
+            <label for="phoneNumber">手机号</label>
+            <input id="phoneNumber" name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel" placeholder="13800138000" maxlength="20" aria-describedby="phoneNumberError phoneNumberHint" required>
+            <div id="phoneNumberError" class="error" aria-live="polite"></div>
+            <div id="phoneNumberHint" class="hint">纯静态离线生成，不经过服务器存储；手机号直接编码在二维码链接中，获得二维码的人可读取号码。</div>
+          </div>
+
+          <div class="actions">
+            <a id="previewLink" class="button primary disabled" aria-disabled="true" target="_blank" rel="noopener noreferrer">打开扫码预览</a>
+            <button id="downloadButton" class="button secondary" type="button" disabled>下载二维码卡片</button>
+            <button id="resetButton" class="button ghost" type="button">清空</button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="preview-column" aria-label="实时预览">
+        <section class="panel phone-preview">
+          <p class="preview-title">手机扫码预览</p>
+          <div id="previewPlate" class="plate" aria-label="车牌号预览">
+            <span class="plate-screw screw-top-left" aria-hidden="true"></span>
+            <span class="plate-screw screw-top-right" aria-hidden="true"></span>
+            <span class="plate-screw screw-bottom-left" aria-hidden="true"></span>
+            <span class="plate-screw screw-bottom-right" aria-hidden="true"></span>
+            <span id="previewProvince">京</span><span id="previewLetter">A</span><span class="plate-dot" aria-hidden="true">•</span><span id="previewNumber">88888</span>
+          </div>
+          <h2 class="scan-message">临时停靠，请多关照</h2>
+          <p class="scan-copy">点击下方按钮联系车主</p>
+          <span class="call-preview">一键呼叫</span>
+        </section>
+
+        <section class="panel print-card" id="cardContent">
+          <h2>微信扫码 | 呼叫车主</h2>
+          <div id="qrcode">
+            <div class="qr-placeholder">填写信息后<br>自动生成二维码</div>
+          </div>
+          <div id="qrStatus" class="status" role="status">等待有效车牌号和手机号</div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div id="saveModal" class="save-modal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle" hidden>
+    <div class="save-modal-backdrop" data-close-modal="true"></div>
+    <div class="save-modal-dialog" role="document">
+      <div class="save-modal-header">
+        <h2 id="saveModalTitle">长按图片保存</h2>
+        <button id="closeSaveModal" class="save-modal-close" type="button" aria-label="关闭弹窗">×</button>
+      </div>
+      <p class="save-modal-tip">微信内置浏览器不支持直接下载图片，请长按下方二维码卡片保存到相册。</p>
+      <img id="saveModalImage" class="save-modal-image" alt="可长按保存的挪车二维码卡片">
+      <button id="confirmSaveModal" class="button ghost save-modal-action" type="button">关闭</button>
+    </div>
+  </div>
+</body>
+</html>
